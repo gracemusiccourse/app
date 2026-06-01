@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grace Music Course — Dashboard Guru</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:          #2a1540;
+    --paper:        #fdfaff;
+    --cream:        #ede5f8;
+    --accent:       #8540b8;
+    --accent-dark:  #6b2d96;
+    --accent-light: #f3e8ff;
+    --pink:         #c94fa0;
+    --pink-light:   #fce8f6;
+    --muted:        #8a6aab;
+    --border:       #d8c5ee;
+    --wa:           #25D366;
+    --wa-dark:      #1aab54;
+    --success:      #1a7a4a;
+    --success-bg:   #e8f5ee;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #4a1070 0%, #8540b8 60%, #c94fa0 100%);
+    padding: 1.4rem 1.75rem;
+  }
+  .header-inner { display: flex; align-items: center; gap: 1rem; }
+  .header-logo {
+    width: 52px; height: 52px; object-fit: contain; flex-shrink: 0;
+    border-radius: 12px; background: rgba(255,255,255,.15); padding: 4px;
+  }
+  .header-label { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.7); font-weight: 500; margin-bottom: 3px; }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: clamp(18px,4vw,24px); font-weight: 400; line-height: 1.2; color: #fff; }
+  header p { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 3px; }
+
+  /* ── Tabs ── */
+  .tab-bar { background: #2a0f4a; display: flex; }
+  .tab-btn {
+    flex: 1; padding: 10px 6px; font-size: 11px; font-family: 'DM Sans', sans-serif;
+    font-weight: 500; letter-spacing: .04em; text-transform: uppercase;
+    background: transparent; border: none; color: #9b7ec0; cursor: pointer; transition: color .15s, background .15s;
+  }
+  .tab-btn.active { color: #f3c0f0; background: #3d1466; border-bottom: 2px solid var(--pink); }
+  a.tab-btn { text-decoration: none; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Cards & Sections ── */
+  .section { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.25rem; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid var(--cream); }
+  .section-header-left { display: flex; align-items: center; gap: 10px; }
+  .section-icon { width: 32px; height: 32px; background: var(--accent-light); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .section-title { font-size: 13px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 11.5px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 12px; width: 100%; transition: border-color .15s, box-shadow .15s; outline: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(133,64,184,.18); background: #fff; }
+  input::placeholder { color: #c2aed8; }
+  select { cursor: pointer; }
+
+  .student-picker { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; }
+  .student-picker select { flex: 1; font-size: 15px; padding: 10px 12px; }
+
+  /* ── Buttons ── */
+  .btn-sm {
+    padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--paper); font-family: 'DM Sans', sans-serif; font-size: 13px;
+    font-weight: 500; cursor: pointer; color: var(--ink); white-space: nowrap; transition: background .15s;
+  }
+  .btn-sm:hover { background: var(--cream); }
+  .btn-sm.danger { color: #c0335a; border-color: #f0cfd8; }
+  .btn-sm.danger:hover { background: #fdf1f4; }
+  .btn-sm.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-sm.primary:hover { background: var(--accent-dark); }
+  .btn-sm:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Student cards ── */
+  .student-list { display: flex; flex-direction: column; gap: 8px; }
+  .student-card { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--paper); border: 1px solid var(--border); border-radius: 10px; gap: 12px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-light), var(--pink-light)); color: var(--accent); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .student-card-info { flex: 1; min-width: 0; }
+  .student-card-name { font-size: 14px; font-weight: 500; }
+  .student-card-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .student-card-fee { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-light); color: var(--accent-dark); border-radius: 5px; padding: 2px 7px; font-size: 11px; font-weight: 500; margin-top: 4px; }
+  .student-card-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+  .add-form { background: var(--paper); border: 1px dashed var(--border); border-radius: 10px; padding: 1.25rem; margin-top: 1rem; display: none; }
+  .add-form.open { display: block; }
+
+  /* ── Invoice fee rows ── */
+  .fee-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-bottom: 1px solid var(--cream); border-radius: 8px; transition: background .15s; margin: 0 -12px; }
+  .fee-row:last-child { border-bottom: none; }
+  .fee-row.active { background: var(--accent-light); }
+  .fee-check { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
+  .fee-label { flex: 1; font-size: 14px; }
+  .fee-amount { width: 145px; }
+  .fee-amount input { text-align: right; font-variant-numeric: tabular-nums; padding: 7px 10px; }
+  .fee-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .total-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 0; margin-top: 6px; border-top: 2px solid var(--cream); }
+  .total-label { font-size: 15px; font-weight: 500; }
+  .total-amount { font-size: 22px; font-weight: 500; color: var(--accent-dark); font-variant-numeric: tabular-nums; }
+
+  /* ── Preview ── */
+  .preview-wrap { background: #1e0a30; border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; border: 1px solid #3d1466; }
+  .preview-header { padding: .75rem 1.25rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #3d1466; }
+  .preview-header span { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #9b7ec0; font-weight: 500; }
+  .preview-dots { display: flex; gap: 5px; }
+  .preview-dots span { width: 8px; height: 8px; border-radius: 50%; background: #4a1a6b; }
+  pre#preview { padding: 1.25rem; font-family: 'Courier New', monospace; font-size: 12.5px; color: #d8bfee; white-space: pre-wrap; word-break: break-word; line-height: 1.75; max-height: 320px; overflow-y: auto; }
+
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; transition: transform .1s, background .15s, box-shadow .15s; }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:hover { background: var(--cream); }
+  .btn-wa { background: var(--wa); color: #fff; }
+  .btn-wa:hover:not(:disabled) { background: var(--wa-dark); }
+  .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .empty { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 13px; }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* ── Spinner ── */
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+  .spinner.dark { border-color: rgba(133,64,184,.2); border-top-color: var(--accent); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Edit modal ── */
+  #edit-overlay { display: none; position: fixed; inset: 0; background: rgba(20,5,40,.55); z-index: 100; align-items: center; justify-content: center; padding: 1.25rem; }
+  #edit-overlay.open { display: flex; }
+  .edit-modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; border: 1px solid var(--border); }
+  .edit-modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; color: var(--ink); }
+  .edit-modal .field { margin-bottom: 12px; }
+
+  /* ── Toast ── */
+  #toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: var(--paper); padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; pointer-events: none; transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s; opacity: 0; white-space: nowrap; z-index: 999; }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── Loading overlay ── */
+  #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(253,250,255,.85); z-index: 200; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+  #loading-overlay.open { display: flex; }
+  #loading-overlay p { font-size: 14px; color: var(--muted); }
+
+  /* ── Status Bayar ── */
+  .bayar-month-bar { display: flex; gap: 10px; margin-bottom: 1.25rem; }
+  .bayar-month-bar select { flex: 1; }
+  .bayar-summary { display: flex; gap: 10px; margin-bottom: 1.25rem; }
+  .bayar-chip { flex: 1; border-radius: 12px; padding: 14px 12px; text-align: center; }
+  .bayar-chip-num { font-size: 28px; font-weight: 500; line-height: 1; }
+  .bayar-chip-label { font-size: 11px; color: var(--muted); margin-top: 5px; letter-spacing: .05em; text-transform: uppercase; }
+  .bayar-chip.sudah { background: var(--success-bg); }
+  .bayar-chip.sudah .bayar-chip-num { color: var(--success); }
+  .bayar-chip.belum { background: var(--pink-light); }
+  .bayar-chip.belum .bayar-chip-num { color: var(--pink); }
+
+  .bayar-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--paper); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; transition: border-color .2s, background .2s; }
+  .bayar-card.paid { border-color: #a8d5b5; background: #f0faf4; }
+  .bayar-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-light), var(--pink-light)); color: var(--accent); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s, color .2s; }
+  .bayar-card.paid .bayar-avatar { background: var(--success-bg); color: var(--success); }
+  .bayar-info { flex: 1; }
+  .bayar-name { font-size: 14px; font-weight: 500; }
+  .bayar-status { font-size: 12px; margin-top: 2px; }
+  .bayar-status.paid   { color: var(--success); }
+  .bayar-status.unpaid { color: var(--pink); }
+
+  /* ── Toggle switch ── */
+  .toggle-switch { position: relative; width: 48px; height: 27px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #d1c4e0; border-radius: 100px; transition: background .2s; }
+  .toggle-slider::before { content: ''; position: absolute; width: 21px; height: 21px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .toggle-switch input:checked + .toggle-slider { background: var(--success); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(21px); }
+
+  @media (max-width: 520px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .btn-row { grid-template-columns: 1fr; }
+    .student-picker { flex-wrap: wrap; }
+    .tab-btn { font-size: 10px; padding: 8px 3px; }
+    .fee-amount { width: 110px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <img src="logo.png" class="header-logo" alt="Grace Music Course" onerror="this.style.display='none'">
+    <div class="header-text">
+      <div class="header-label">Grace Music Course</div>
+      <h1>Dashboard Guru</h1>
+      <p>Generate invoice & kelola murid</p>
+    </div>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showPage('invoice')">💰 Invoice</button>
+  <button class="tab-btn" onclick="showPage('bayar')">✅ Status Bayar</button>
+  <button class="tab-btn" onclick="showPage('murid')">👥 Data Murid</button>
+  <a href="report.html" class="tab-btn">📊 Report</a>
+</div>
+
+<main>
+
+  <!-- ══ PAGE: INVOICE ══ -->
+  <div class="page active" id="page-invoice">
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon">👤</div>
+          <div class="section-title">Murid & Bulan</div>
+        </div>
+      </div>
+      <div class="student-picker">
+        <select id="murid-select" onchange="onSelectMurid()">
+          <option value="">— Pilih murid —</option>
+        </select>
+        <button class="btn-sm" onclick="showPage('murid')">+ Tambah</button>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Bulan</label>
+          <select id="inv-bulan" onchange="updatePreview()">
+            <option>Januari</option><option>Februari</option><option>Maret</option>
+            <option>April</option><option>Mei</option><option>Juni</option>
+            <option>Juli</option><option>Agustus</option><option>September</option>
+            <option>Oktober</option><option>November</option><option>Desember</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tahun</label>
+          <select id="inv-tahun" onchange="updatePreview()"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon">💵</div>
+          <div class="section-title">Rincian Tagihan</div>
+        </div>
+      </div>
+
+      <div class="fee-row">
+        <span class="fee-label">Biaya les</span>
+        <div class="fee-amount">
+          <input type="number" id="fee-lesson" value="0" min="0" oninput="updatePreview()">
+        </div>
+      </div>
+      <div class="fee-row" id="row-transport">
+        <input type="checkbox" class="fee-check" id="chk-transport" checked onchange="toggleRow('transport')">
+        <span class="fee-label">Transport</span>
+        <div class="fee-amount">
+          <input type="number" id="fee-transport" value="75000" min="0" oninput="updatePreview()">
+        </div>
+      </div>
+      <div class="fee-row" id="row-denda">
+        <input type="checkbox" class="fee-check" id="chk-denda" onchange="toggleRow('denda')">
+        <span class="fee-label">Denda (bayar di atas tgl 10)</span>
+        <div class="fee-amount">
+          <input type="number" id="fee-denda" value="50000" min="0" oninput="updatePreview()">
+        </div>
+      </div>
+      <div class="fee-row" id="row-buku">
+        <input type="checkbox" class="fee-check" id="chk-buku" onchange="toggleRow('buku')">
+        <span class="fee-label">Buku</span>
+        <div class="fee-amount">
+          <input type="number" id="fee-buku" value="0" min="0" oninput="updatePreview()">
+        </div>
+      </div>
+
+      <div class="total-row">
+        <span class="total-label">Total</span>
+        <span class="total-amount" id="total-display">Rp 0</span>
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-header">
+        <span>Preview Pesan WA</span>
+        <div class="preview-dots"><span></span><span></span><span></span></div>
+      </div>
+      <pre id="preview">Pilih murid untuk melihat preview...</pre>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="copyMsg()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Salin Pesan
+      </button>
+      <button class="btn btn-wa" onclick="sendWA()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        Kirim WA
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: STATUS BAYAR ══ -->
+  <div class="page" id="page-bayar">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon">✅</div>
+          <div class="section-title">Status Pembayaran</div>
+        </div>
+      </div>
+      <div class="bayar-month-bar">
+        <select id="bayar-bulan" onchange="renderBayar()">
+          <option>Januari</option><option>Februari</option><option>Maret</option>
+          <option>April</option><option>Mei</option><option>Juni</option>
+          <option>Juli</option><option>Agustus</option><option>September</option>
+          <option>Oktober</option><option>November</option><option>Desember</option>
+        </select>
+        <select id="bayar-tahun" onchange="renderBayar()"></select>
+      </div>
+      <div class="bayar-summary">
+        <div class="bayar-chip sudah">
+          <div class="bayar-chip-num" id="count-sudah">0</div>
+          <div class="bayar-chip-label">Sudah Bayar</div>
+        </div>
+        <div class="bayar-chip belum">
+          <div class="bayar-chip-num" id="count-belum">0</div>
+          <div class="bayar-chip-label">Belum Bayar</div>
+        </div>
+      </div>
+      <div id="bayar-list">
+        <div class="empty"><div class="spinner dark"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: DATA MURID ══ -->
+  <div class="page" id="page-murid">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-icon">👥</div>
+          <div class="section-title">Daftar Murid</div>
+        </div>
+        <button class="btn-sm" onclick="toggleAddForm()">+ Tambah Murid</button>
+      </div>
+
+      <div class="add-form" id="add-form">
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="field">
+            <label>Nama Murid</label>
+            <input id="f-nama" type="text" placeholder="cth. Elora">
+          </div>
+          <div class="field">
+            <label>Fee per Lesson (Rp)</label>
+            <input id="f-fee" type="number" placeholder="cth. 750000" min="0">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>No. WhatsApp Orang Tua</label>
+          <input id="f-wa" type="tel" placeholder="cth. 08123456789">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm primary" id="btn-save-murid" onclick="saveStudent()">Simpan</button>
+          <button class="btn-sm" onclick="toggleAddForm()">Batal</button>
+        </div>
+      </div>
+
+      <div class="student-list" id="student-list">
+        <div class="empty"><div class="empty-icon">⏳</div><div>Memuat data murid...</div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Edit Modal -->
+<div id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-modal">
+    <h3>Edit Data Murid</h3>
+    <input type="hidden" id="e-id">
+    <div class="field" style="margin-bottom:12px"><label>Nama Murid</label><input id="e-nama" type="text"></div>
+    <div class="field" style="margin-bottom:12px"><label>Fee per Lesson (Rp)</label><input id="e-fee" type="number" min="0"></div>
+    <div class="field" style="margin-bottom:12px"><label>No. WhatsApp Orang Tua</label><input id="e-wa" type="tel"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn-sm primary" onclick="saveEdit()">Simpan</button>
+      <button class="btn-sm" onclick="closeEdit()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading-overlay">
+  <div class="spinner dark" style="width:28px;height:28px;border-width:3px"></div>
+  <p id="loading-text">Memuat...</p>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwxod20kgAUE5_PQtv6ZJPq6-9wFyPyyaPQ1yU7ZRx-HbmDC2zH9jP5WDzTo_QzjrA/exec';
+
+let students = [];
+
+const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni',
+                'Juli','Agustus','September','Oktober','November','Desember'];
+
+// Fee diambil langsung dari objek student (disimpan di Google Sheet)
+
+// ── Init date selects ─────────────────────────────────
+function initDateSelects() {
+  const now = new Date();
+  const curMonth = MONTHS[now.getMonth()];
+  const curYear  = now.getFullYear();
+
+  document.getElementById('inv-bulan').value   = curMonth;
+  document.getElementById('bayar-bulan').value = curMonth;
+
+  ['inv-tahun', 'bayar-tahun'].forEach(id => {
+    const sel = document.getElementById(id);
+    for (let y = curYear - 1; y <= curYear + 1; y++) {
+      const o = document.createElement('option');
+      o.value = y; o.textContent = y;
+      if (y === curYear) o.selected = true;
+      sel.appendChild(o);
+    }
+  });
+}
+
+// ── Tabs ──────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[{ invoice: 0, bayar: 1, murid: 2 }[name]].classList.add('active');
+  if (name === 'murid') renderStudentList();
+  if (name === 'bayar') renderBayar();
+}
+
+// ── API ───────────────────────────────────────────────
+async function apiGet(params) {
+  const r = await fetch(API + '?' + new URLSearchParams(params));
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  return d;
+}
+async function apiPost(body) {
+  const r = await fetch(API, { method: 'POST', body: JSON.stringify(body) });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  return d;
+}
+
+// ── Toast / Loading ───────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+function showLoading(msg) {
+  document.getElementById('loading-text').textContent = msg || 'Memuat...';
+  document.getElementById('loading-overlay').classList.add('open');
+}
+function hideLoading() { document.getElementById('loading-overlay').classList.remove('open'); }
+
+// ── Students ──────────────────────────────────────────
+async function loadStudents() {
+  showLoading('Memuat data murid...');
+  try {
+    students = await apiGet({ action: 'get_murid' });
+    refreshSelect();
+    renderStudentList();
+    renderBayar();
+  } catch(e) {
+    showToast('⚠ Gagal memuat: ' + e.message);
+  } finally { hideLoading(); }
+}
+
+function refreshSelect() {
+  const sorted = [...students].sort((a,b) => a.nama.localeCompare(b.nama));
+  const sel = document.getElementById('murid-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Pilih murid —</option>' +
+    sorted.map(s => `<option value="${s.id}">${s.nama}</option>`).join('');
+  if (cur) sel.value = cur;
+  updatePreview();
+}
+
+function getSelected() {
+  const id = document.getElementById('murid-select').value;
+  return students.find(s => s.id === id) || null;
+}
+
+// ── Toggle fee row highlight ──────────────────────────
+function toggleRow(name) {
+  const checked = document.getElementById('chk-' + name).checked;
+  document.getElementById('row-' + name).classList.toggle('active', checked);
+  updatePreview();
+}
+
+function initRowStates() {
+  ['transport', 'denda', 'buku'].forEach(name => {
+    const checked = document.getElementById('chk-' + name).checked;
+    document.getElementById('row-' + name).classList.toggle('active', checked);
+  });
+}
+
+// ── Invoice ───────────────────────────────────────────
+function onSelectMurid() {
+  const s = getSelected();
+  if (s) {
+    // auto-fill fee dari data murid (tersimpan di Google Sheet)
+    document.getElementById('fee-lesson').value = s.fee || '';
+  }
+  updatePreview();
+}
+
+function fmtNum(n) {
+  return n.toLocaleString('id-ID');
+}
+
+function calcTotal() {
+  const lesson    = parseInt(document.getElementById('fee-lesson').value)    || 0;
+  const transport = document.getElementById('chk-transport').checked
+                  ? (parseInt(document.getElementById('fee-transport').value) || 0) : 0;
+  const denda     = document.getElementById('chk-denda').checked
+                  ? (parseInt(document.getElementById('fee-denda').value)    || 0) : 0;
+  const buku      = document.getElementById('chk-buku').checked
+                  ? (parseInt(document.getElementById('fee-buku').value)     || 0) : 0;
+  return lesson + transport + denda + buku;
+}
+
+function updatePreview() {
+  const total = calcTotal();
+  document.getElementById('total-display').textContent = 'Rp ' + fmtNum(total);
+  document.getElementById('preview').textContent = buildMsg();
+}
+
+function buildMsg() {
+  const s = getSelected();
+  const nama  = s ? s.nama : '[nama murid]';
+  const bulan = document.getElementById('inv-bulan').value;
+
+  const lessonFee    = parseInt(document.getElementById('fee-lesson').value)    || 0;
+  const hasTransport = document.getElementById('chk-transport').checked;
+  const transportFee = parseInt(document.getElementById('fee-transport').value) || 0;
+  const hasDenda     = document.getElementById('chk-denda').checked;
+  const dendaFee     = parseInt(document.getElementById('fee-denda').value)     || 0;
+  const hasBuku      = document.getElementById('chk-buku').checked;
+  const bukuFee      = parseInt(document.getElementById('fee-buku').value)      || 0;
+  const total        = calcTotal();
+
+  const lines = [];
+  lines.push(`Dear parents/students`);
+  lines.push(`Mau reminder pembayaran uang les ${nama} bulan ${bulan}`);
+  lines.push(`Lesson fee ${fmtNum(lessonFee)}`);
+  if (hasTransport) lines.push(`Transport ${fmtNum(transportFee)}`);
+  if (hasDenda)     lines.push(`Denda payment diatas tanggal 10 ${fmtNum(dendaFee)}`);
+  if (hasBuku)      lines.push(`Buku ${fmtNum(bukuFee)}`);
+  lines.push(`*Total: ${fmtNum(total)}*`);
+  if (hasDenda) lines.push(`*Notes: Pembayaran di atas tanggal 10 akan dikenakan denda sebesar ${fmtNum(dendaFee)}*`);
+  lines.push(`Mohon transfer ke BCA 5200367202 an. Grace Joe`);
+  lines.push(`beserta bukti transfer ya`);
+  lines.push(`Thankyou☺️🙏`);
+
+  return lines.join('\n');
+}
+
+function copyMsg() {
+  navigator.clipboard.writeText(buildMsg())
+    .then(() => showToast('✓ Pesan berhasil disalin'))
+    .catch(() => showToast('Gagal menyalin'));
+}
+
+function sendWA() {
+  const s = getSelected();
+  if (!s) { showToast('⚠ Pilih murid dulu'); return; }
+  let wa = s.wa.replace(/\D/g, '');
+  if (wa.startsWith('0')) wa = '62' + wa.slice(1);
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(buildMsg())}`, '_blank');
+}
+
+// ── Status Bayar ──────────────────────────────────────
+function bayarKey() {
+  const b = document.getElementById('bayar-bulan').value;
+  const t = document.getElementById('bayar-tahun').value;
+  return `gmc_bayar_${t}_${b}`;
+}
+
+function getBayarData() {
+  try { return JSON.parse(localStorage.getItem(bayarKey()) || '{}'); }
+  catch { return {}; }
+}
+
+function setBayarData(data) {
+  localStorage.setItem(bayarKey(), JSON.stringify(data));
+}
+
+function toggleBayar(studentId, checked) {
+  const data = getBayarData();
+  if (checked) data[studentId] = true;
+  else delete data[studentId];
+  setBayarData(data);
+  renderBayar();
+}
+
+function renderBayar() {
+  const data   = getBayarData();
+  const sorted = [...students].sort((a,b) => a.nama.localeCompare(b.nama));
+  const el     = document.getElementById('bayar-list');
+
+  if (!sorted.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🎵</div><div>Belum ada data murid.</div></div>';
+    document.getElementById('count-sudah').textContent = '0';
+    document.getElementById('count-belum').textContent = '0';
+    return;
+  }
+
+  const sudah = sorted.filter(s => data[s.id]).length;
+  document.getElementById('count-sudah').textContent = sudah;
+  document.getElementById('count-belum').textContent = sorted.length - sudah;
+
+  // belum bayar dulu, sudah bayar di bawah
+  const ordered = [
+    ...sorted.filter(s => !data[s.id]),
+    ...sorted.filter(s =>  data[s.id])
+  ];
+
+  el.innerHTML = ordered.map(s => {
+    const paid = !!data[s.id];
+    const fee  = s.fee || 0;
+    return `
+    <div class="bayar-card${paid ? ' paid' : ''}">
+      <div class="bayar-avatar">${initials(s.nama)}</div>
+      <div class="bayar-info">
+        <div class="bayar-name">${s.nama}</div>
+        <div class="bayar-status ${paid ? 'paid' : 'unpaid'}">${paid ? '✓ Sudah bayar' : '○ Belum bayar'}${fee ? ' · Rp ' + fmtNum(fee) : ''}</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" ${paid ? 'checked' : ''} onchange="toggleBayar('${s.id}', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`;
+  }).join('');
+}
+
+// ── Student CRUD ──────────────────────────────────────
+function toggleAddForm() {
+  const f = document.getElementById('add-form');
+  f.classList.toggle('open');
+  if (f.classList.contains('open')) {
+    ['f-nama','f-fee','f-wa'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-nama').focus();
+  }
+}
+
+async function saveStudent() {
+  const nama = document.getElementById('f-nama').value.trim();
+  const fee  = parseInt(document.getElementById('f-fee').value) || 0;
+  const wa   = document.getElementById('f-wa').value.trim();
+  if (!nama || !wa) { showToast('⚠ Nama dan nomor WA wajib diisi'); return; }
+  const btn = document.getElementById('btn-save-murid');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    const result = await apiPost({ action: 'add_murid', nama, wa, fee });
+    students.push({ id: result.id, nama, wa, fee });
+    toggleAddForm();
+    renderStudentList();
+    refreshSelect();
+    showToast(`✓ ${nama} berhasil ditambahkan`);
+  } catch(e) { showToast('⚠ Gagal: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Simpan'; }
+}
+
+async function deleteStudent(id) {
+  const s = students.find(x => x.id === id);
+  if (!confirm(`Hapus data ${s ? s.nama : 'murid ini'}?`)) return;
+  try {
+    await apiPost({ action: 'delete_murid', id });
+    students = students.filter(x => x.id !== id);
+    renderStudentList(); refreshSelect();
+    showToast('Murid dihapus');
+  } catch(e) { showToast('⚠ Gagal hapus: ' + e.message); }
+}
+
+function openEdit(id) {
+  const s = students.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('e-id').value   = s.id;
+  document.getElementById('e-nama').value = s.nama;
+  document.getElementById('e-fee').value  = s.fee || '';
+  document.getElementById('e-wa').value   = s.wa;
+  document.getElementById('edit-overlay').classList.add('open');
+}
+function closeEdit() { document.getElementById('edit-overlay').classList.remove('open'); }
+
+async function saveEdit() {
+  const id   = document.getElementById('e-id').value;
+  const nama = document.getElementById('e-nama').value.trim();
+  const fee  = parseInt(document.getElementById('e-fee').value) || 0;
+  const wa   = document.getElementById('e-wa').value.trim();
+  if (!nama || !wa) { showToast('⚠ Nama dan nomor WA wajib diisi'); return; }
+  try {
+    await apiPost({ action: 'update_murid', id, nama, wa, fee });
+    students = students.map(s => s.id === id ? {...s, nama, wa, fee} : s);
+    closeEdit(); renderStudentList(); refreshSelect();
+    showToast(`✓ Data ${nama} diperbarui`);
+  } catch(e) { showToast('⚠ Gagal: ' + e.message); }
+}
+
+function initials(nama) {
+  return nama.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+}
+
+function renderStudentList() {
+  const sorted = [...students].sort((a,b) => a.nama.localeCompare(b.nama));
+  const el = document.getElementById('student-list');
+  if (!sorted.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🎵</div><div>Belum ada data murid.<br>Klik "+ Tambah Murid" untuk mulai.</div></div>`;
+    return;
+  }
+  el.innerHTML = sorted.map(s => {
+    const fee = s.fee || 0;
+    return `
+    <div class="student-card">
+      <div class="avatar">${initials(s.nama)}</div>
+      <div class="student-card-info">
+        <div class="student-card-name">${s.nama}</div>
+        <div class="student-card-meta">📱 ${s.wa}</div>
+        ${fee ? `<span class="student-card-fee">💵 Rp ${fmtNum(fee)}/lesson</span>` : ''}
+      </div>
+      <div class="student-card-actions">
+        <button class="btn-sm" onclick="openEdit('${s.id}')">Edit</button>
+        <button class="btn-sm danger" onclick="deleteStudent('${s.id}')">Hapus</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Init
+initDateSelects();
+initRowStates();
+loadStudents();
+updatePreview();
+</script>
+</body>
+</html>

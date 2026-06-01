@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progress Report — Grace Music Course</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --ink:          #2a1540;
+    --paper:        #fdfaff;
+    --cream:        #ede5f8;
+    --accent:       #8540b8;
+    --accent-dark:  #6b2d96;
+    --accent-light: #f3e8ff;
+    --pink:         #c94fa0;
+    --pink-light:   #fce8f6;
+    --muted:        #8a6aab;
+    --border:       #d8c5ee;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  /* ── Header ── */
+  header { background: linear-gradient(135deg, #4a1070 0%, #8540b8 60%, #c94fa0 100%); padding: 1.4rem 1.75rem; }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .header-left  { display: flex; align-items: center; gap: 1rem; }
+  .header-logo  { width: 52px; height: 52px; object-fit: contain; flex-shrink: 0; border-radius: 12px; background: rgba(255,255,255,.15); padding: 4px; }
+  .header-label { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.7); font-weight: 500; margin-bottom: 3px; }
+  header h1     { font-family: 'DM Serif Display', serif; font-size: clamp(16px,4vw,22px); font-weight: 400; color: #fff; }
+  header p      { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 3px; }
+  .back-btn     { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,.85); text-decoration: none; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.3); transition: background .15s; white-space: nowrap; flex-shrink: 0; }
+  .back-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+  /* ── Layout ── */
+  .page-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem 5rem; display: grid; grid-template-columns: 370px 1fr; gap: 2rem; align-items: start; }
+
+  /* ── Form Panel ── */
+  .section { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.25rem; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1px solid var(--cream); }
+  .section-icon { width: 32px; height: 32px; background: var(--accent-light); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .section-title { font-size: 13px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-size: 11.5px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+  input[type="text"], textarea {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 12px; width: 100%; transition: border-color .15s, box-shadow .15s; outline: none;
+  }
+  input[type="text"]:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(133,64,184,.18); background: #fff; }
+  input::placeholder, textarea::placeholder { color: #c2aed8; }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  /* Period selects */
+  .period-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .period-wrap select { flex: 1; min-width: 80px; font-size: 13px; padding: 8px 10px; }
+  .period-dash { font-size: 16px; color: var(--muted); flex-shrink: 0; }
+
+  /* ── Rating radio group ── */
+  .rating-group { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--cream); }
+  .rating-group:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .rating-group-label { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+  .rating-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .radio-opt { position: relative; }
+  .radio-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-opt label {
+    display: block; text-align: center; padding: 7px 3px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--muted);
+    transition: all .15s; white-space: nowrap; letter-spacing: 0; text-transform: none;
+  }
+  .radio-opt input:checked + label { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(133,64,184,.35); }
+  .radio-opt label:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Buttons ── */
+  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; transition: transform .1s, background .15s, opacity .15s; }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:hover { background: var(--cream); }
+  .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* ── Preview Panel ── */
+  .preview-panel { position: sticky; top: 1.5rem; }
+  .preview-label { font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .report-wrap { background: #ddd0f0; border-radius: 16px; padding: 24px; overflow-x: auto; }
+
+  /* ════ REPORT CARD ════ */
+  #report-card {
+    width: 680px;
+    min-width: 680px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 6px 40px rgba(70,0,100,.18);
+  }
+
+  /* Card header */
+  .rc-header {
+    background: linear-gradient(135deg, #3d0d60 0%, #7b35a8 55%, #c94fa0 100%);
+    padding: 26px 32px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .rc-logo-box {
+    width: 72px; height: 72px; border-radius: 14px;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+  }
+  .rc-logo-img { width: 64px; height: 64px; object-fit: contain; border-radius: 10px; }
+  .rc-school  { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.65); font-weight: 500; margin-bottom: 4px; }
+  .rc-title   { font-family: 'DM Serif Display', serif; font-size: 26px; color: #fff; line-height: 1.1; }
+  .rc-period  { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 4px; font-style: italic; }
+
+  /* Info bar */
+  .rc-info { display: flex; background: #f7f0ff; border-bottom: 2px solid var(--cream); }
+  .rc-info-cell { flex: 1; padding: 13px 22px; border-right: 1px solid var(--cream); }
+  .rc-info-cell:last-child { border-right: none; }
+  .rc-info-lbl { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 3px; }
+  .rc-info-val { font-size: 15px; font-weight: 500; color: var(--ink); }
+
+  /* Body */
+  .rc-body { padding: 22px 26px 18px; }
+
+  /* Table */
+  .rc-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; border-radius: 10px; overflow: hidden; }
+  .rc-table thead tr { background: linear-gradient(90deg, #5c2080, #8540b8); }
+  .rc-table thead th {
+    padding: 11px 10px; font-size: 11px; font-weight: 500; letter-spacing: .07em;
+    text-transform: uppercase; text-align: center; color: rgba(255,255,255,.92);
+  }
+  .rc-table thead th:first-child { text-align: left; padding-left: 16px; width: 38%; color: #fff; }
+
+  .rc-table tbody tr { transition: background .1s; }
+  .rc-table tbody tr:nth-child(odd)  { background: #fdfaff; }
+  .rc-table tbody tr:nth-child(even) { background: #f5edff; }
+
+  .rc-table tbody td {
+    padding: 13px 10px; font-size: 13px; border-bottom: 1px solid #ede5f8;
+    text-align: center; color: #c2aed8;
+    transition: background .15s, color .15s;
+  }
+  .rc-table tbody td:first-child { text-align: left; padding-left: 16px; font-weight: 500; color: var(--ink); font-size: 13.5px; }
+  .rc-table tbody tr:last-child td { border-bottom: none; }
+
+  .rc-table tbody td.sel {
+    background: var(--accent) !important;
+    color: #fff !important;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* Feedback */
+  .rc-feedback { background: #f7f0ff; border-radius: 10px; padding: 15px 18px; margin-bottom: 14px; border-left: 4px solid var(--accent); }
+  .rc-fb-lbl   { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 7px; }
+  .rc-fb-text  { font-size: 12.5px; color: var(--ink); line-height: 1.75; min-height: 32px; white-space: pre-wrap; word-break: break-word; }
+
+  /* Footer */
+  .rc-footer { padding: 12px 26px 16px; border-top: 1px solid var(--cream); text-align: center; }
+  .rc-footer-brand { font-size: 11px; color: var(--muted); letter-spacing: .14em; text-transform: uppercase; }
+
+  /* ── Toast ── */
+  #toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: var(--paper); padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; pointer-events: none; transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s; opacity: 0; white-space: nowrap; z-index: 999; }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── Print ── */
+  @media print {
+    header, .form-panel, .preview-label, .report-wrap { background: none !important; }
+    header, .form-panel, .preview-label { display: none !important; }
+    body, .page-wrap { display: block; padding: 0; margin: 0; background: white; }
+    .preview-panel { position: static; }
+    .report-wrap { padding: 0; background: none; border-radius: 0; }
+    #report-card { width: 100%; min-width: unset; box-shadow: none; border-radius: 0; }
+    .rc-header, .rc-table thead tr, .rc-table tbody td.sel, .rc-feedback, .rc-info {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .page-wrap { grid-template-columns: 1fr; }
+    .preview-panel { position: static; order: -1; }
+    #report-card { min-width: 600px; }
+  }
+  @media (max-width: 520px) {
+    .rating-options { grid-template-columns: repeat(2, 1fr); }
+    .btn-group { grid-template-columns: 1fr; }
+    .back-btn span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <img src="logo.png" class="header-logo" alt="" onerror="this.style.display='none'">
+      <div>
+        <div class="header-label">Grace Music Course</div>
+        <h1>Progress Report</h1>
+        <p>Generate laporan perkembangan murid</p>
+      </div>
+    </div>
+    <a href="index.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+      <span>Dashboard</span>
+    </a>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <!-- ══ FORM PANEL ══ -->
+  <div class="form-panel">
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">👤</div>
+        <span class="section-title">Info Murid</span>
+      </div>
+      <div class="field">
+        <div class="field-label">Nama Murid</div>
+        <input type="text" id="f-student" placeholder="cth. Elora" oninput="syncCard()">
+      </div>
+      <div class="field">
+        <div class="field-label">Nama Guru</div>
+        <input type="text" id="f-teacher" placeholder="cth. Grace" oninput="syncCard()">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <div class="field-label">Rentang Bulan</div>
+        <div class="period-wrap">
+          <select id="f-from-month" onchange="syncCard()"></select>
+          <select id="f-from-year"  onchange="syncCard()"></select>
+          <span class="period-dash">–</span>
+          <select id="f-to-month"   onchange="syncCard()"></select>
+          <select id="f-to-year"    onchange="syncCard()"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">🎵</div>
+        <span class="section-title">Penilaian</span>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-group-label">Note Reading</div>
+        <div class="rating-options">
+          <div class="radio-opt"><input type="radio" name="r-note-reading" id="nr-e" value="excellent" onchange="syncCard()"><label for="nr-e">Excellent</label></div>
+          <div class="radio-opt"><input type="radio" name="r-note-reading" id="nr-v" value="very-good" onchange="syncCard()"><label for="nr-v">Very Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-note-reading" id="nr-g" value="good"      onchange="syncCard()"><label for="nr-g">Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-note-reading" id="nr-a" value="average"   onchange="syncCard()"><label for="nr-a">Average</label></div>
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-group-label">Aural</div>
+        <div class="rating-options">
+          <div class="radio-opt"><input type="radio" name="r-aural" id="au-e" value="excellent" onchange="syncCard()"><label for="au-e">Excellent</label></div>
+          <div class="radio-opt"><input type="radio" name="r-aural" id="au-v" value="very-good" onchange="syncCard()"><label for="au-v">Very Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-aural" id="au-g" value="good"      onchange="syncCard()"><label for="au-g">Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-aural" id="au-a" value="average"   onchange="syncCard()"><label for="au-a">Average</label></div>
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-group-label">Artistry</div>
+        <div class="rating-options">
+          <div class="radio-opt"><input type="radio" name="r-artistry" id="ar-e" value="excellent" onchange="syncCard()"><label for="ar-e">Excellent</label></div>
+          <div class="radio-opt"><input type="radio" name="r-artistry" id="ar-v" value="very-good" onchange="syncCard()"><label for="ar-v">Very Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-artistry" id="ar-g" value="good"      onchange="syncCard()"><label for="ar-g">Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-artistry" id="ar-a" value="average"   onchange="syncCard()"><label for="ar-a">Average</label></div>
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-group-label">Musicality</div>
+        <div class="rating-options">
+          <div class="radio-opt"><input type="radio" name="r-musicality" id="mu-e" value="excellent" onchange="syncCard()"><label for="mu-e">Excellent</label></div>
+          <div class="radio-opt"><input type="radio" name="r-musicality" id="mu-v" value="very-good" onchange="syncCard()"><label for="mu-v">Very Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-musicality" id="mu-g" value="good"      onchange="syncCard()"><label for="mu-g">Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-musicality" id="mu-a" value="average"   onchange="syncCard()"><label for="mu-a">Average</label></div>
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-group-label">Focus & Discipline</div>
+        <div class="rating-options">
+          <div class="radio-opt"><input type="radio" name="r-focus" id="fo-e" value="excellent" onchange="syncCard()"><label for="fo-e">Excellent</label></div>
+          <div class="radio-opt"><input type="radio" name="r-focus" id="fo-v" value="very-good" onchange="syncCard()"><label for="fo-v">Very Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-focus" id="fo-g" value="good"      onchange="syncCard()"><label for="fo-g">Good</label></div>
+          <div class="radio-opt"><input type="radio" name="r-focus" id="fo-a" value="average"   onchange="syncCard()"><label for="fo-a">Average</label></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">📝</div>
+        <span class="section-title">Additional Feedback</span>
+      </div>
+      <textarea id="f-feedback" placeholder="Tuliskan catatan atau feedback untuk orang tua..." oninput="syncCard()" style="margin-bottom:0"></textarea>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="btn-png" onclick="downloadPNG()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PNG
+      </button>
+      <button class="btn btn-outline" onclick="printReport()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print / PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ PREVIEW PANEL ══ -->
+  <div class="preview-panel">
+    <div class="preview-label">Live Preview</div>
+    <div class="report-wrap">
+
+      <div id="report-card">
+
+        <!-- Header -->
+        <div class="rc-header">
+          <div class="rc-logo-box" id="rc-logo-box">
+            <img src="logo.png" class="rc-logo-img" alt="" onerror="this.parentElement.innerHTML='🎵'">
+          </div>
+          <div>
+            <div class="rc-school">Grace Music Course</div>
+            <div class="rc-title">Progress Report</div>
+            <div class="rc-period" id="rc-period">—</div>
+          </div>
+        </div>
+
+        <!-- Info bar -->
+        <div class="rc-info">
+          <div class="rc-info-cell">
+            <div class="rc-info-lbl">Student</div>
+            <div class="rc-info-val" id="rc-student">—</div>
+          </div>
+          <div class="rc-info-cell">
+            <div class="rc-info-lbl">Teacher</div>
+            <div class="rc-info-val" id="rc-teacher">—</div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="rc-body">
+
+          <table class="rc-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Excellent</th>
+                <th>Very Good</th>
+                <th>Good</th>
+                <th>Average</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-note-reading">
+                <td>Note Reading</td>
+                <td data-r="excellent"></td>
+                <td data-r="very-good"></td>
+                <td data-r="good"></td>
+                <td data-r="average"></td>
+              </tr>
+              <tr id="row-aural">
+                <td>Aural</td>
+                <td data-r="excellent"></td>
+                <td data-r="very-good"></td>
+                <td data-r="good"></td>
+                <td data-r="average"></td>
+              </tr>
+              <tr id="row-artistry">
+                <td>Artistry</td>
+                <td data-r="excellent"></td>
+                <td data-r="very-good"></td>
+                <td data-r="good"></td>
+                <td data-r="average"></td>
+              </tr>
+              <tr id="row-musicality">
+                <td>Musicality</td>
+                <td data-r="excellent"></td>
+                <td data-r="very-good"></td>
+                <td data-r="good"></td>
+                <td data-r="average"></td>
+              </tr>
+              <tr id="row-focus">
+                <td>Focus & Discipline</td>
+                <td data-r="excellent"></td>
+                <td data-r="very-good"></td>
+                <td data-r="good"></td>
+                <td data-r="average"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Feedback -->
+          <div class="rc-feedback">
+            <div class="rc-fb-lbl">Additional Feedback</div>
+            <div class="rc-fb-text" id="rc-feedback">—</div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="rc-footer">
+          <div class="rc-footer-brand">✦ Grace Music Course ✦</div>
+        </div>
+
+      </div><!-- /report-card -->
+    </div><!-- /report-wrap -->
+  </div><!-- /preview-panel -->
+
+</div><!-- /page-wrap -->
+
+<div id="toast"></div>
+
+<script>
+const MONTHS_EN = ['January','February','March','April','May','June',
+                   'July','August','September','October','November','December'];
+
+function initPeriodSelects() {
+  const now = new Date();
+  const curYear = now.getFullYear();
+  const curMon  = now.getMonth(); // 0-based
+
+  ['f-from-month','f-to-month'].forEach((id, idx) => {
+    const sel = document.getElementById(id);
+    MONTHS_EN.forEach((m, i) => {
+      const o = document.createElement('option');
+      o.value = m; o.textContent = m;
+      if (i === (idx === 0 ? Math.max(0, curMon - 2) : curMon)) o.selected = true;
+      sel.appendChild(o);
+    });
+  });
+
+  ['f-from-year','f-to-year'].forEach(id => {
+    const sel = document.getElementById(id);
+    for (let y = curYear - 1; y <= curYear + 1; y++) {
+      const o = document.createElement('option');
+      o.value = y; o.textContent = y;
+      if (y === curYear) o.selected = true;
+      sel.appendChild(o);
+    }
+  });
+}
+
+function buildPeriod() {
+  const fm = document.getElementById('f-from-month').value;
+  const fy = document.getElementById('f-from-year').value;
+  const tm = document.getElementById('f-to-month').value;
+  const ty = document.getElementById('f-to-year').value;
+  if (fy === ty) return `${fm} – ${tm} ${ty}`;
+  return `${fm} ${fy} – ${tm} ${ty}`;
+}
+
+const CATS = [
+  { key: 'note-reading', name: 'r-note-reading' },
+  { key: 'aural',        name: 'r-aural'        },
+  { key: 'artistry',     name: 'r-artistry'     },
+  { key: 'musicality',   name: 'r-musicality'   },
+  { key: 'focus',        name: 'r-focus'        },
+];
+
+function syncCard() {
+  // Text fields
+  const student  = document.getElementById('f-student').value.trim();
+  const teacher  = document.getElementById('f-teacher').value.trim();
+  const feedback = document.getElementById('f-feedback').value.trim();
+
+  document.getElementById('rc-student').textContent  = student  || '—';
+  document.getElementById('rc-teacher').textContent  = teacher  || '—';
+  document.getElementById('rc-period').textContent   = buildPeriod();
+  document.getElementById('rc-feedback').textContent = feedback || '—';
+
+  // Ratings → update table cells
+  CATS.forEach(({ key, name }) => {
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    const val = checked ? checked.value : null;
+    const row = document.getElementById('row-' + key);
+    if (!row) return;
+    row.querySelectorAll('td[data-r]').forEach(td => {
+      const active = td.dataset.r === val;
+      td.classList.toggle('sel', active);
+      td.textContent = active ? '✓' : '';
+    });
+  });
+}
+
+// ── Download PNG ──────────────────────────────────────
+async function downloadPNG() {
+  const btn  = document.getElementById('btn-png');
+  const card = document.getElementById('report-card');
+  btn.disabled = true;
+  showToast('Generating image...');
+  try {
+    const canvas = await html2canvas(card, {
+      scale: 2.5,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: false,
+    });
+    const student = document.getElementById('f-student').value.trim() || 'report';
+    const fname   = 'progress-report-' + student.toLowerCase().replace(/\s+/g, '-') + '.png';
+    const link    = document.createElement('a');
+    link.download = fname;
+    link.href     = canvas.toDataURL('image/png');
+    link.click();
+    showToast('✓ Berhasil didownload!');
+  } catch(e) {
+    showToast('⚠ Gagal: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Print / PDF ───────────────────────────────────────
+function printReport() {
+  window.print();
+}
+
+// ── Toast ─────────────────────────────────────────────
+let _tt;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(_tt);
+  _tt = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+initPeriodSelects();
+syncCard();
+</script>
+</body>
+</html>
