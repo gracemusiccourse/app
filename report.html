@@ -83,7 +83,35 @@
   .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
   .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
   .btn-outline:hover { background: var(--cream); }
+  .btn-save { background: var(--accent-light); color: var(--accent-dark); border: 1.5px solid var(--border); }
+  .btn-save:hover:not(:disabled) { background: var(--cream); border-color: var(--accent); }
   .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* Riwayat cards */
+  .riwayat-card { background: var(--paper); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+  .riwayat-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; cursor: pointer; gap: 10px; }
+  .riwayat-head:hover { background: var(--cream); }
+  .riwayat-periode { font-size: 13px; font-weight: 500; flex: 1; }
+  .riwayat-meta    { font-size: 11px; color: var(--muted); }
+  .riwayat-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .riwayat-chevron { font-size: 11px; color: var(--muted); transition: transform .2s; }
+  .riwayat-head.open .riwayat-chevron { transform: rotate(180deg); }
+  .riwayat-body { display: none; padding: 12px 14px; border-top: 1px solid var(--cream); }
+  .riwayat-body.open { display: block; }
+  .riwayat-ratings { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .rating-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .rating-badge.excellent  { background: #ede9fe; color: #5b21b6; }
+  .rating-badge.very-good  { background: var(--accent-light); color: var(--accent-dark); }
+  .rating-badge.good       { background: #e8f5ee; color: var(--success); }
+  .rating-badge.average    { background: #fff3cd; color: #92600a; }
+  .rating-badge.none       { background: var(--cream); color: var(--muted); }
+  .riwayat-feedback { font-size: 12.5px; color: var(--ink); line-height: 1.6; background: var(--accent-light); border-radius: 8px; padding: 8px 12px; border-left: 3px solid var(--accent); }
+  .btn-del { padding: 4px 10px; border-radius: 7px; border: 1px solid #f0cfd8; background: transparent; font-size: 12px; color: #c0335a; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-del:hover { background: #fdf1f4; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+  .spinner.dark { border-color: rgba(133,64,184,.2); border-top-color: var(--accent); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 13px; }
 
   /* ── Preview Panel ── */
   .preview-panel { position: sticky; top: 1.5rem; }
@@ -328,6 +356,22 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
         Print / PDF
       </button>
+      <button class="btn btn-save" id="btn-save" onclick="saveReport()" style="grid-column:1/-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Simpan Report
+      </button>
+    </div>
+
+    <!-- Riwayat Report -->
+    <div class="section" id="riwayat-section" style="display:none">
+      <div class="section-header">
+        <div class="section-icon">🕐</div>
+        <span class="section-title">Riwayat Report</span>
+        <span id="riwayat-count" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+      <div id="riwayat-list">
+        <div class="empty"><div class="spinner dark"></div></div>
+      </div>
     </div>
   </div>
 
@@ -462,8 +506,10 @@ function onSelectMurid() {
   if (s) {
     document.getElementById('f-student').value = s.nama;
     selectedWA = s.wa || '';
+    loadReports(id);
   } else {
     selectedWA = '';
+    document.getElementById('riwayat-section').style.display = 'none';
   }
   syncCard();
 }
@@ -564,6 +610,125 @@ async function downloadPNG() {
     showToast('⚠ Gagal: ' + e.message);
   } finally {
     btn.disabled = false;
+  }
+}
+
+// ── Save Report ───────────────────────────────────────
+async function saveReport() {
+  const muridId = document.getElementById('f-murid-select').value;
+  const student = document.getElementById('f-student').value.trim();
+  if (!student) { showToast('⚠ Pilih atau isi nama murid dulu'); return; }
+
+  const ratings = {};
+  CATS.forEach(({ key, name }) => {
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    ratings[key] = checked ? checked.value : '';
+  });
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Menyimpan...';
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify({
+        action:       'add_report',
+        murid_id:     muridId || '',
+        nama_murid:   student,
+        nama_guru:    document.getElementById('f-teacher').value.trim(),
+        periode:      buildPeriod(),
+        note_reading: ratings['note-reading'],
+        aural:        ratings['aural'],
+        artistry:     ratings['artistry'],
+        musicality:   ratings['musicality'],
+        focus:        ratings['focus'],
+        feedback:     document.getElementById('f-feedback').value.trim()
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    showToast('✓ Report berhasil disimpan!');
+    if (muridId) loadReports(muridId);
+  } catch(e) {
+    showToast('⚠ Gagal simpan: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Simpan Report';
+  }
+}
+
+// ── Load & render riwayat ─────────────────────────────
+async function loadReports(muridId) {
+  if (!muridId) return;
+  document.getElementById('riwayat-section').style.display = 'block';
+  document.getElementById('riwayat-list').innerHTML = '<div class="empty"><div class="spinner dark"></div></div>';
+  try {
+    const res  = await fetch(API + '?' + new URLSearchParams({ action: 'get_reports', murid_id: muridId }));
+    const data = await res.json();
+    renderRiwayat(data);
+  } catch(e) {
+    document.getElementById('riwayat-list').innerHTML = '<div class="empty">Gagal memuat riwayat.</div>';
+  }
+}
+
+const RATING_LABEL = { 'excellent': 'Excellent', 'very-good': 'Very Good', 'good': 'Good', 'average': 'Average', '': '—' };
+const CAT_LABEL    = { 'note-reading': 'Note Reading', 'aural': 'Aural', 'artistry': 'Artistry', 'musicality': 'Musicality', 'focus': 'Focus & Discipline' };
+
+function renderRiwayat(list) {
+  const el = document.getElementById('riwayat-list');
+  document.getElementById('riwayat-count').textContent = list.length + ' report';
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">Belum ada report tersimpan.</div>';
+    return;
+  }
+  el.innerHTML = list.map(r => {
+    const ratings = [
+      { cat: 'note-reading', val: r.note_reading },
+      { cat: 'aural',        val: r.aural        },
+      { cat: 'artistry',     val: r.artistry      },
+      { cat: 'musicality',   val: r.musicality    },
+      { cat: 'focus',        val: r.focus         },
+    ];
+    const badgesHtml = ratings.map(({ cat, val }) =>
+      `<span class="rating-badge ${val || 'none'}">${CAT_LABEL[cat]}: ${RATING_LABEL[val] || '—'}</span>`
+    ).join('');
+    const feedbackHtml = r.feedback
+      ? `<div class="riwayat-feedback">${r.feedback}</div>` : '';
+    return `
+    <div class="riwayat-card">
+      <div class="riwayat-head" onclick="toggleRiwayat(this)">
+        <div>
+          <div class="riwayat-periode">📅 ${r.periode}</div>
+          <div class="riwayat-meta">Guru: ${r.nama_guru || '—'} &nbsp;·&nbsp; Disimpan: ${r.tanggal}</div>
+        </div>
+        <div class="riwayat-actions">
+          <button class="btn-del" onclick="event.stopPropagation();deleteReport('${r.id}','${r.murid_id}')">Hapus</button>
+          <span class="riwayat-chevron">▼</span>
+        </div>
+      </div>
+      <div class="riwayat-body">
+        <div class="riwayat-ratings">${badgesHtml}</div>
+        ${feedbackHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRiwayat(head) {
+  head.classList.toggle('open');
+  head.nextElementSibling.classList.toggle('open');
+}
+
+async function deleteReport(id, muridId) {
+  if (!confirm('Hapus report ini?')) return;
+  try {
+    const res  = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'delete_report', id }) });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    showToast('Report dihapus');
+    loadReports(muridId);
+  } catch(e) {
+    showToast('⚠ Gagal hapus: ' + e.message);
   }
 }
 
