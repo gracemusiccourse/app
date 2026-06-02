@@ -199,6 +199,28 @@
 </head>
 <body>
 
+<!-- ── Password Gate ── -->
+<div id="pw-gate" style="
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#4a1070 0%,#8540b8 60%,#c94fa0 100%);
+  display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="background:#fff;border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="font-size:48px;margin-bottom:1rem">🔐</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#2a1540;margin-bottom:6px">Admin Dashboard</div>
+    <div style="font-size:13px;color:#8a6aab;margin-bottom:1.5rem">Grace Music Course</div>
+    <input id="pw-input" type="password" placeholder="Masukkan password"
+      style="font-family:'DM Sans',sans-serif;font-size:15px;color:#2a1540;background:#fdfaff;border:1.5px solid #d8c5ee;border-radius:10px;padding:11px 14px;width:100%;outline:none;margin-bottom:10px;box-sizing:border-box;text-align:center;letter-spacing:.1em"
+      onkeydown="if(event.key==='Enter')checkPW()">
+    <div id="pw-error" style="font-size:12px;color:#c0335a;min-height:18px;margin-bottom:10px"></div>
+    <button onclick="checkPW()" style="
+      width:100%;padding:13px;border-radius:10px;border:none;
+      background:linear-gradient(135deg,#6b2d96,#c94fa0);
+      color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer">
+      Masuk
+    </button>
+  </div>
+</div>
+
 <header>
   <div class="header-inner">
     <img src="logo.png" class="header-logo" alt="Grace Music Course" onerror="this.style.display='none'">
@@ -752,7 +774,23 @@ function renderStudentList() {
   }).join('');
 }
 
+// ── Password gate ─────────────────────────────────────
+function checkPW() {
+  const val = document.getElementById('pw-input').value;
+  if (val === 'invoice123') {
+    sessionStorage.setItem('gmc_admin_auth', '1');
+    document.getElementById('pw-gate').style.display = 'none';
+  } else {
+    document.getElementById('pw-error').textContent = '⚠ Password salah, coba lagi.';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
 // Init
+if (sessionStorage.getItem('gmc_admin_auth') === '1') {
+  document.getElementById('pw-gate').style.display = 'none';
+}
 initDateSelects();
 initRowStates();
 loadStudents();
