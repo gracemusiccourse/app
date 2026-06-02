@@ -565,20 +565,20 @@ function buildMsg() {
   const bukuFee      = parseInt(document.getElementById('fee-buku').value)      || 0;
   const total        = calcTotal();
 
-  const lines = [];
-  lines.push(`Dear parents/students`);
-  lines.push(`Mau reminder pembayaran uang les ${nama} bulan ${bulan}`);
-  lines.push(`Lesson fee ${fmtNum(lessonFee)}`);
-  if (hasTransport) lines.push(`Transport ${fmtNum(transportFee)}`);
-  if (hasDenda)     lines.push(`Denda payment diatas tanggal 10 ${fmtNum(dendaFee)}`);
-  if (hasBuku)      lines.push(`Buku ${fmtNum(bukuFee)}`);
-  lines.push(`*Total: ${fmtNum(total)}*`);
-  if (hasDenda) lines.push(`*Notes: Pembayaran di atas tanggal 10 akan dikenakan denda sebesar ${fmtNum(dendaFee)}*`);
-  lines.push(`Mohon transfer ke BCA 5200367202 an. Grace Joe`);
-  lines.push(`beserta bukti transfer ya`);
-  lines.push(`Thankyou☺️🙏`);
+  const feeLines = [];
+  feeLines.push(`Lesson fee ${fmtNum(lessonFee)}`);
+  if (hasTransport) feeLines.push(`Transport ${fmtNum(transportFee)}`);
+  if (hasDenda)     feeLines.push(`Denda payment diatas tanggal 10 ${fmtNum(dendaFee)}`);
+  if (hasBuku)      feeLines.push(`Buku ${fmtNum(bukuFee)}`);
 
-  return lines.join('\n');
+  const parts = [];
+  parts.push(`Dear parents/students\nMau reminder pembayaran uang les ${nama} bulan ${bulan}`);
+  parts.push(feeLines.join('\n'));
+  parts.push(`*Total: ${fmtNum(total)}*`);
+  if (hasDenda) parts.push(`*Notes: Pembayaran di atas tanggal 10 akan dikenakan denda sebesar ${fmtNum(dendaFee)}*`);
+  parts.push(`Mohon transfer ke BCA *5200367202* an. Grace Joe\nbeserta bukti transfer ya\nThankyou☺️🙏`);
+
+  return parts.join('\n\n');
 }
 
 function copyMsg() {
